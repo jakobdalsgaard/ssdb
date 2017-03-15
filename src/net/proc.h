@@ -54,6 +54,9 @@ struct ProcJob{
 	double time_wait;
 	double time_proc;
 	
+	const Request *req;
+	Response resp;
+	
 	ProcJob(){
 		result = 0;
 		serv = NULL;
@@ -62,6 +65,8 @@ struct ProcJob{
 		stime = 0;
 		time_wait = 0;
 		time_proc = 0;
+	}
+	~ProcJob(){
 	}
 };
 
@@ -124,6 +129,7 @@ public:
 template<class T>
 static std::string serialize_req(T &req){
 	std::string ret;
+	ret.reserve(1024);
 	char buf[50];
 	for(int i=0; i<req.size(); i++){
 		if(i >= 5 && i < req.size() - 1){
@@ -135,8 +141,7 @@ static std::string serialize_req(T &req){
 			if(req[i].size() == 0){
 				ret.append("\"\"");
 			}else{
-				std::string h = hexmem(req[i].data(), req[i].size());
-				ret.append(h);
+				str_escape(req[i].data(), req[i].size(), &ret);
 			}
 		}else{
 			sprintf(buf, "[%d]", (int)req[i].size());

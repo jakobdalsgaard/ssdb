@@ -20,6 +20,8 @@ public:
 	SSDB(){}
 	virtual ~SSDB(){};
 	static SSDB* open(const Options &opt, const std::string &base_dir);
+	
+	virtual int flushdb() = 0;
 
 	// return (start, end], not include start
 	virtual Iterator* iterator(const std::string &start, const std::string &end, uint64_t limit) = 0;
@@ -101,6 +103,7 @@ public:
 			std::vector<std::string> *list) = 0;
 	virtual int zrlist(const Bytes &name_s, const Bytes &name_e, uint64_t limit,
 			std::vector<std::string> *list) = 0;
+	virtual int64_t zfix(const Bytes &name) = 0;
 	
 	virtual int64_t qsize(const Bytes &name) = 0;
 	// @return 0: empty queue, 1: item peeked, -1: error

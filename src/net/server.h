@@ -29,19 +29,20 @@ private:
 
 	//Config *conf;
 	ready_list_t serv_link;
-	IpFilter *ip_filter;
 	Fdevents *fdes;
 
 	Link* accept_link(Link *srv);
 	int proc_result(ProcJob *job, ready_list_t *ready_list);
 	int proc_client_event(const Fdevent *fde, ready_list_t *ready_list);
 
-	void proc(ProcJob *job);
+	int proc(ProcJob *job);
 
 	int num_readers;
 	int num_writers;
 	ProcWorkerPool *writer;
 	ProcWorkerPool *reader;
+	
+	bool readonly;
 
 	NetworkServer();
 
@@ -49,6 +50,7 @@ protected:
 	void usage(int argc, char **argv);
 
 public:
+	IpFilter *ip_filter;
 	void *data;
 	ProcMap proc_map;
 	int link_count;

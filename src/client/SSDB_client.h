@@ -145,6 +145,11 @@ public:
 		const std::string &key_start, const std::string &key_end,
 		uint64_t limit, std::vector<std::string> *ret) = 0;
 	/**
+	 * Return all hashmap key-value pairs.
+	 * The two elements at ret[n] and ret[n+1] form a key-value pair, n=0,2,4,...
+	 */
+	virtual Status hgetall(const std::string &name, std::vector<std::string> *ret) = 0;
+	/**
 	 * Return key-value pairs.
 	 * The two elements at ret[n] and ret[n+1] form a key-value pair, n=0,2,4,...
 	 */
@@ -231,9 +236,12 @@ public:
 	virtual Status multi_zdel(const std::string &name, const std::vector<std::string> &keys) = 0;
 	/// @}
 
-	virtual Status qpush(const std::string &name, const std::string &item) = 0;
-	virtual Status qpop(const std::string &name, std::string *item) = 0;
+	virtual Status qpush(const std::string &name, const std::string &item, int64_t *ret_size=NULL) = 0;
+	virtual Status qpush(const std::string &name, const std::vector<std::string> &items, int64_t *ret_size=NULL) = 0;
+	virtual Status qpop(const std::string &name, std::string *ret) = 0;
+	virtual Status qpop(const std::string &name, int64_t limit, std::vector<std::string> *ret) = 0;
 	virtual Status qslice(const std::string &name, int64_t begin, int64_t end, std::vector<std::string> *ret) = 0;
+	virtual Status qrange(const std::string &name, int64_t begin, int64_t limit, std::vector<std::string> *ret) = 0;
 	virtual Status qclear(const std::string &name, int64_t *ret=NULL) = 0;
 private:
 	// No copying allowed

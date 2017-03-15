@@ -53,6 +53,7 @@ public:
 	virtual Status hclear(const std::string &name, int64_t *ret=NULL);
 	virtual Status hkeys(const std::string &name, const std::string &key_start, const std::string &key_end,
 		uint64_t limit, std::vector<std::string> *ret);
+	virtual Status hgetall(const std::string &name, std::vector<std::string> *ret);
 	virtual Status hscan(const std::string &name, const std::string &key_start, const std::string &key_end,
 		uint64_t limit, std::vector<std::string> *ret);
 	virtual Status hrscan(const std::string &name, const std::string &key_start, const std::string &key_end,
@@ -90,9 +91,12 @@ public:
 	virtual Status multi_zset(const std::string &name, const std::map<std::string, int64_t> &kss);
 	virtual Status multi_zdel(const std::string &name, const std::vector<std::string> &keys);
 
-	virtual Status qpush(const std::string &name, const std::string &item);
+	virtual Status qpush(const std::string &name, const std::string &item, int64_t *ret_size=NULL);
+	virtual Status qpush(const std::string &name, const std::vector<std::string> &items, int64_t *ret_size=NULL);
 	virtual Status qpop(const std::string &name, std::string *item);
+	virtual Status qpop(const std::string &name, int64_t limit, std::vector<std::string> *ret);
 	virtual Status qslice(const std::string &name, int64_t begin, int64_t end, std::vector<std::string> *ret);
+	virtual Status qrange(const std::string &name, int64_t begin, int64_t limit, std::vector<std::string> *ret);
 	virtual Status qclear(const std::string &name, int64_t *ret=NULL);
 };
 

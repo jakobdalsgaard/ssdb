@@ -69,6 +69,7 @@ DEF_PROC(zdel);
 DEF_PROC(zincr);
 DEF_PROC(zdecr);
 DEF_PROC(zclear);
+DEF_PROC(zfix);
 DEF_PROC(zscan);
 DEF_PROC(zrscan);
 DEF_PROC(zkeys);
@@ -115,6 +116,7 @@ DEF_PROC(version);
 DEF_PROC(dbsize);
 DEF_PROC(compact);
 DEF_PROC(clear_binlog);
+DEF_PROC(flushdb);
 
 DEF_PROC(get_key_range);
 DEF_PROC(ignore_key_range);
@@ -192,6 +194,7 @@ void SSDBServer::reg_procs(NetworkServer *net){
 	REG_PROC(zincr, "wt");
 	REG_PROC(zdecr, "wt");
 	REG_PROC(zclear, "wt");
+	REG_PROC(zfix, "wt");
 	REG_PROC(zscan, "rt");
 	REG_PROC(zrscan, "rt");
 	REG_PROC(zkeys, "rt");
@@ -232,6 +235,7 @@ void SSDBServer::reg_procs(NetworkServer *net){
 	REG_PROC(qset, "wt");
 
 	REG_PROC(clear_binlog, "wt");
+	REG_PROC(flushdb, "wt");
 
 	REG_PROC(dump, "b");
 	REG_PROC(sync140, "b");
@@ -286,6 +290,9 @@ SSDBServer::SSDBServer(SSDB *ssdb, SSDB *meta, const Config &conf, NetworkServer
 				}
 				std::string ip = c->get_str("ip");
 				int port = c->get_num("port");
+				if(ip == ""){
+					ip = c->get_str("host");
+				}
 				if(ip == "" || port <= 0 || port > 65535){
 					continue;
 				}
@@ -386,6 +393,18 @@ bool SSDBServer::in_kv_range(const std::string &key){
 int proc_clear_binlog(NetworkServer *net, Link *link, const Request &req, Response *resp){
 	SSDBServer *serv = (SSDBServer *)net->data;
 	serv->ssdb->binlogs->flush();
+	resp->push_back("ok");
+	return 0;
+}
+
+int proc_flushdb(NetworkServer *net, Link *link, const Request &req, Response *resp){
+	SSDBServer *serv = (SSDBServer *)net->data;
+	if(serv->slaves.size() > 0 || serv->backend_sync->stats().size() > 0){
+		resp->push_back("error");
+		resp->push_back("flushdb is not allowed when replication is in use!");
+		return 0;
+	}
+	serv->ssdb->flushdb();
 	resp->push_back("ok");
 	return 0;
 }

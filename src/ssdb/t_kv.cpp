@@ -117,7 +117,6 @@ int SSDBImpl::del(const Bytes &key, char log_type){
 	Transaction trans(binlogs);
 
 	std::string buf = encode_kv_key(key);
-	binlogs->begin();
 	binlogs->Delete(buf);
 	binlogs->add_log(log_type, BinlogCommand::KDEL, buf);
 	leveldb::Status s = binlogs->commit();
@@ -159,7 +158,7 @@ int SSDBImpl::incr(const Bytes &key, int64_t by, int64_t *new_val, char log_type
 int SSDBImpl::get(const Bytes &key, std::string *val){
 	std::string buf = encode_kv_key(key);
 
-	leveldb::Status s = db->Get(leveldb::ReadOptions(), buf, val);
+	leveldb::Status s = ldb->Get(leveldb::ReadOptions(), buf, val);
 	if(s.IsNotFound()){
 		return 0;
 	}
@@ -248,7 +247,7 @@ int SSDBImpl::getbit(const Bytes &key, int bitoffset){
 	if(len >= val.size()){
 		return 0;
 	}
-	return val[len] & (1 << bit);
+	return (val[len] & (1 << bit)) == 0? 0 : 1;
 }
 
 

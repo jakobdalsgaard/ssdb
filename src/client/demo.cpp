@@ -18,7 +18,7 @@ char* readline(char *buf, int num){
 }
 
 int main(int argc, char **argv){
-	printf("Usage: %s [ip] [port]\n", argv[0]);
+	printf("Usage: %s [host] [port]\n", argv[0]);
 	const char *ip = (argc >= 2)? argv[1] : "127.0.0.1";
 	int port = (argc >= 3)? atoi(argv[2]) : 8888;
 
@@ -291,6 +291,34 @@ int main(int argc, char **argv){
 		ret = -1;
 		s = client->zclear(zset, &ret);
 		assert(s.ok() && ret != -1);
+	}
+	
+	{
+		std::vector<std::string> list;
+		std::string item;
+		int64_t size;
+		int64_t size2;
+		
+		s = client->qpush("q", "a", &size);
+		assert(s.ok());
+		
+		list.push_back("k1");
+		list.push_back("k2");
+		s = client->qpush("q", list, &size2);
+		assert(s.ok());
+		assert(size2 = size + list.size());
+		
+		s = client->qpop("q", &item);
+		assert(s.ok());
+		
+		list.clear();
+		s = client->qpop("q", 2, &list);
+		assert(s.ok());
+		assert(list.size() == 2);
+		
+		list.clear();
+		s = client->qrange("q", 0, -1, &list);
+		assert(s.ok());
 	}
 	
 	delete client;
